@@ -13,6 +13,8 @@ class ViewController: UIViewController, WKNavigationDelegate {
     
     var webView: WKWebView!
     var progressView: UIProgressView!
+    var webSites = ["apple.com",
+                    "hackingwithswift.com"]
 
     override func loadView() {
         webView = WKWebView()
@@ -47,15 +49,16 @@ class ViewController: UIViewController, WKNavigationDelegate {
         // context value (nil). "If vou provide value that same context value gets sent back to you when your notifivation value is changed
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         
-        let url = URL(string: "https://www.hackingwithswift.com")!
+        let url = URL(string: "https://" + webSites[0])!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
     }
     
     @objc func openTapped() {
         let ac = UIAlertController(title: "Open page...", message: nil, preferredStyle: .actionSheet)
-        ac.addAction(UIAlertAction(title: "apple.com", style: .default, handler: openPage))
-        ac.addAction(UIAlertAction(title: "hackingwithswoft.com", style: .default, handler: openPage))
+        for website in webSites {
+            ac.addAction(UIAlertAction(title: website, style: .default, handler: openPage))
+        }
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
         // attach to bar button tem fo iPAD
@@ -78,6 +81,23 @@ class ViewController: UIViewController, WKNavigationDelegate {
         if keyPath == "estimatedProgress" {
             progressView.progress = Float(webView.estimatedProgress)
         }
+    }
+    
+    // this delegate callbaks allows to decide whether to allow navigation to happen or not EVERY TIME SOMETHING HAPPENES
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        let url = navigationAction.request.url
+        
+        // not all URL has hosts !
+        if let host = url?.host {
+            for website in webSites {
+                if host.contains(website) {
+                    // allows loading page
+                    decisionHandler(.allow)
+                    return
+                }
+            }
+        }
+        decisionHandler(.cancel)
     }
     
 }
