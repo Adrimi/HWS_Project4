@@ -59,6 +59,9 @@ class ViewController: UIViewController, WKNavigationDelegate {
         for website in webSites {
             ac.addAction(UIAlertAction(title: website, style: .default, handler: openPage))
         }
+        // TEST CODE, INSERTING BLACKLISTED SITE!
+        ac.addAction(UIAlertAction(title: "google.com", style: .default, handler: openPage))
+        // TEST CODE
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         
         // attach to bar button tem fo iPAD
@@ -68,7 +71,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
 
     func openPage(action: UIAlertAction) {
         guard let actionTitle = action.title else {return}
-        guard  let url = URL(string: "https://" + actionTitle) else {return}
+        guard let url = URL(string: "https://" + actionTitle) else {return}
         webView.load(URLRequest(url: url))
     }
     
@@ -98,6 +101,13 @@ class ViewController: UIViewController, WKNavigationDelegate {
             }
         }
         decisionHandler(.cancel)
+        showSomeUIAlertContoller(title: "Close!", message: "This site is blockn my friend")
+    }
+    
+    func showSomeUIAlertContoller(title: String, message: String) {
+        let vc = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        vc.addAction(UIAlertAction(title:"Continue", style: .default, handler: nil))
+        present(vc, animated: true)
     }
     
 }
