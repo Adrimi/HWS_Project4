@@ -12,6 +12,7 @@ import WebKit
 class ViewController: UIViewController, WKNavigationDelegate {
     
     var webView: WKWebView!
+    var progressView: UIProgressView!
 
     override func loadView() {
         webView = WKWebView()
@@ -23,6 +24,28 @@ class ViewController: UIViewController, WKNavigationDelegate {
         super.viewDidLoad()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Open", style: .plain, target: self, action: #selector(openTapped))
+        
+        // configure bottom spacer and refresh button
+        let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: webView, action: #selector(webView.reload))
+        
+        // new UI instance
+        progressView = UIProgressView(progressViewStyle: .default)
+        // set layout size to fill its fully
+        progressView.sizeToFit()
+        // create new item using custom BarButtonItem
+        let progressButton = UIBarButtonItem(customView: progressView)
+
+        
+        toolbarItems = [progressButton, spacer, refresh]
+        navigationController?.isToolbarHidden = false
+        
+        // configure key value observing
+        // who the observer is? (self)
+        // what property want to observe (progress)
+        // which value we want? (new)
+        // context value (nil). "If vou provide value that same context value gets sent back to you when your notifivation value is changed
+        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         
         let url = URL(string: "https://www.hackingwithswift.com")!
         webView.load(URLRequest(url: url))
@@ -49,6 +72,12 @@ class ViewController: UIViewController, WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         // called when page finished loading
         title = webView.title
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "estimatedProgress" {
+            progressView.progress = Float(webView.estimatedProgress)
+        }
     }
     
 }
